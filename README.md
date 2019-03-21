@@ -5,6 +5,75 @@
 Live Server
 ===========
 
+使用node创建https服务器
+- 生成证书
+首先生成 私钥
+```
+openssl genrsa -out privatekey.pem 1024
+```
+
+根据私钥生成签名
+```
+openssl req -new -key privatekey.pem -out certrequest.csr
+```
+
+
+通过私钥和签名 生成证书
+```
+openssl x509 -req -in certrequest.csr -signkey privatekey.pem -out certificate.pem
+```
+生成完成后会得到三个文件 ，将文件复制到项目的根路径下。
+
+
+
+
+- 使用证书
+
+index.js
+```
+var liveServer = require("live-server");
+var fs = require("fs");
+
+var options = {
+	cert: fs.readFileSync(__dirname + "/certificate.pem"),
+	key: fs.readFileSync(__dirname + "/privatekey.pem"),
+	passphrase: ""
+};
+
+var params = {
+	port: 8181, // Set the server port. Defaults to 8080.
+	host: "0.0.0.0", // Set the address to bind to. Defaults to 0.0.0.0 or process.env.IP.
+	root: "/Users/nick/Downloads/tmp/showing/YourProject/dist", // Set root directory that's being served. Defaults to cwd.
+	open: false, // When false, it won't load your browser by default.
+	ignore: 'scss,my/templates', // comma-separated string for paths to ignore
+	file: "index.html", // When set, serve this file (server root relative) for every 404 (useful for single-page applications)
+	wait: 1000, // Waits for all changes, before reloading. Defaults to 0 sec.
+	mount: [['/components', './node_modules']], // Mount a directory to a route.
+	logLevel: 2, // 0 = errors only, 1 = some, 2 = lots
+	middleware: [function(req, res, next) { next(); }], // Takes an array of Connect-compatible middleware that are injected into the server middleware stack
+	https: options, // todo HTTPS 关键
+	'https-module': 'spdy', // todo HTTPS 关键
+};
+liveServer.start(params);
+```
+
+- 运行服务器
+
+```
+npm i -S live-server
+node index.js
+```
+
+
+
+
+
+
+
+
+
+------
+
 This is a little development server with live reload capability. Use it for hacking your HTML/JavaScript/CSS files, but not for deploying the final site.
 
 There are two reasons for using this:
